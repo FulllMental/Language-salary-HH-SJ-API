@@ -4,6 +4,7 @@ import requests
 def get_hh_vacancies():
     payload = {
         'text': f'программист',
+        'area': '1',
     }
 
     response = requests.get('https://api.hh.ru/vacancies', params=payload)
