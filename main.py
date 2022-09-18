@@ -6,6 +6,7 @@ def get_hh_vacancies(programming_language):
         'text': f'программист {programming_language}',
         'area': '1',
         'period': '30',
+        'only_with_salary': True,
     }
 
     response = requests.get('https://api.hh.ru/vacancies', params=payload)
@@ -37,5 +38,6 @@ if __name__ == '__main__':
         'Swift',
         'TypeScript'
     ]
-    print(count_vacancies(programming_languages))
 
+    for vacancy in get_hh_vacancies('Python').json()['items']:
+        print(vacancy['salary'])
