@@ -1,9 +1,9 @@
 import requests
 
 
-def get_api_response(programming_language):
+def get_api_response(language):
     payload = {
-        'text': f'программист {programming_language}',
+        'text': f'программист {language}',
         'area': '1',
         'period': '30',
         'only_with_salary': True,
@@ -14,12 +14,26 @@ def get_api_response(programming_language):
     return response
 
 
-def count_vacancies(programming_languages):
+def get_hh_vacancies(programming_languages):
     language_vacancies = {}
+
     for language in programming_languages:
-        found = get_api_response(language).json()["found"]
-        if found > 99:
-            language_vacancies.update({language: found})
+        search_results = get_api_response(language).json()
+        vacancies_found = search_results["found"]
+
+        if vacancies_found > 99:
+            average_salary = [predict_rub_salary(vacancy) for vacancy in search_results['items'] if
+                              vacancy['salary']['currency'] == 'RUR']
+            vacancies_processed = len(average_salary)
+            language_vacancies.update(
+                {
+                    language: {
+                        'vacancies_found': vacancies_found,
+                        'vacancies_processed': vacancies_processed,
+                        'average_salary': int(sum(average_salary) / vacancies_processed)
+                    }
+                }
+            )
     return language_vacancies
 
 
@@ -27,15 +41,12 @@ def predict_rub_salary(vacancy):
     salary_from = vacancy['salary']['from']
     salary_to = vacancy['salary']['to']
 
-    if vacancy['salary']['currency'] == 'RUR':
-        if salary_to and salary_from:
-            return salary_from + salary_to / 2
-        elif salary_to:
-            return salary_to * 0.8
-        elif salary_from:
-            return salary_from * 1.2
-    else:
-        return None
+    if salary_to and salary_from:
+        return salary_from + salary_to / 2
+    elif salary_to:
+        return salary_to * 0.8
+    elif salary_from:
+        return salary_from * 1.2
 
 
 if __name__ == '__main__':
@@ -54,5 +65,4 @@ if __name__ == '__main__':
         'TypeScript'
     ]
 
-    for vacancy in get_api_response('Python').json()['items']:
-        print(predict_rub_salary(vacancy))
+    print(get_hh_vacancies(programming_languages))
