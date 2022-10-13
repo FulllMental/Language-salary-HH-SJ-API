@@ -55,17 +55,21 @@ def predict_rub_salary(vacancy):
     elif salary_from:
         return salary_from * 1.2
 
-def get_sjapi_response(sj_api_key):
+
+def get_sjapi_response(sj_api_key, language):
     headers = {
         'X-Api-App-Id': sj_api_key
     }
     payload = {
         'page': 0,
         'count': 100,
+        'town': 4,
+        'keyword': f'Программист {language}',
     }
     response = requests.get('https://api.superjob.ru/2.0/vacancies', headers=headers, params=payload)
     response.raise_for_status()
     return response.json()
+
 
 if __name__ == '__main__':
     # programming_languages = [
@@ -98,9 +102,9 @@ if __name__ == '__main__':
     #         continue
     #
     # print(language_vacancies)
-
+    language = 'Python'
     load_dotenv()
     sj_api_key = os.getenv('SECRET_KEY')
-    sj_response = get_sjapi_response(sj_api_key)['objects']
+    sj_response = get_sjapi_response(sj_api_key, language)['objects']
     for vacancy in sj_response:
-        print(vacancy['profession'])
+        print(f'{vacancy["profession"]}, {vacancy["town"]["title"]}')
