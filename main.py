@@ -29,7 +29,7 @@ def get_all_vacancies(programming_language, page, pages_number, total_vacancies)
 
 
 def get_average_info_hh(programming_language, total_vacancies, total_found):
-    average_salary = [predict_rub_salary(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
+    average_salary = [predict_rub_salary_for_hh(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
     vacancies_processed = len(average_salary)
     language_vacancies.update(
         {
@@ -43,11 +43,7 @@ def get_average_info_hh(programming_language, total_vacancies, total_found):
     return language_vacancies
 
 
-def predict_rub_salary(vacancy):
-
-    salary_from = vacancy['salary']['from']
-    salary_to = vacancy['salary']['to']
-
+def predict_rub_salary(salary_from, salary_to):
     if salary_to and salary_from:
         return salary_from + salary_to / 2
     elif salary_to:
@@ -56,9 +52,21 @@ def predict_rub_salary(vacancy):
         return salary_from * 1.2
 
 
-def get_sjapi_response(sj_api_key, language):
+def predict_rub_salary_for_hh(vacancy):
+    salary_from = vacancy['salary']['from']
+    salary_to = vacancy['salary']['to']
+    return predict_rub_salary(salary_from, salary_to)
+
+
+def perdict_rub_salary_for_superjob(vacancy):
+    salary_from = vacancy['payment_from']
+    salary_to = vacancy['payment_to']
+    return predict_rub_salary(salary_from, salary_to)
+
+
+def get_superjob_api_response(sj_api_key, language):
     headers = {
-        'X-Api-App-Id': sj_api_key
+        'X-Api-App-Id': sj_api_key,
     }
     payload = {
         'page': 0,
@@ -105,6 +113,6 @@ if __name__ == '__main__':
     language = 'Python'
     load_dotenv()
     sj_api_key = os.getenv('SECRET_KEY')
-    sj_response = get_sjapi_response(sj_api_key, language)['objects']
+    sj_response = get_superjob_api_response(sj_api_key, language)['objects']
     for vacancy in sj_response:
-        print(f'{vacancy["profession"]}, {vacancy["town"]["title"]}')
+        print(f'{vacancy["profession"]}, {vacancy["town"]["title"]}, {perdict_rub_salary_for_superjob(vacancy)}')
