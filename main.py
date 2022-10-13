@@ -1,4 +1,6 @@
+import os
 import requests
+from dotenv import load_dotenv
 
 
 def get_api_response(language, page):
@@ -27,8 +29,7 @@ def get_all_vacancies(programming_language, page, pages_number, total_vacancies)
 
 
 def get_average_info_hh(programming_language, total_vacancies, total_found):
-    average_salary = [predict_rub_salary(vacancy) for vacancy in total_vacancies if
-                      vacancy['salary']['currency'] == 'RUR']
+    average_salary = [predict_rub_salary(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
     vacancies_processed = len(average_salary)
     language_vacancies.update(
         {
@@ -43,6 +44,7 @@ def get_average_info_hh(programming_language, total_vacancies, total_found):
 
 
 def predict_rub_salary(vacancy):
+
     salary_from = vacancy['salary']['from']
     salary_to = vacancy['salary']['to']
 
@@ -52,38 +54,53 @@ def predict_rub_salary(vacancy):
         return salary_to * 0.8
     elif salary_from:
         return salary_from * 1.2
-    else:
-        None
 
+def get_sjapi_response(sj_api_key):
+    headers = {
+        'X-Api-App-Id': sj_api_key
+    }
+    payload = {
+        'page': 0,
+        'count': 100,
+    }
+    response = requests.get('https://api.superjob.ru/2.0/vacancies', headers=headers, params=payload)
+    response.raise_for_status()
+    return response.json()
 
 if __name__ == '__main__':
-    programming_languages = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'C++',
-        'C#',
-        'C',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'TypeScript'
-    ]
-
+    # programming_languages = [
+    #     'JavaScript',
+    #     'Java',
+    #     'Python',
+    #     'Ruby',
+    #     'C++',
+    #     'C#',
+    #     'C',
+    #     'Go',
+    #     'Objective-C',
+    #     'Scala',
+    #     'Swift',
+    #     'TypeScript'
+    # ]
+    #
     language_vacancies = {}
-    for language in programming_languages:
-        page = 0
-        first_page = get_api_response(language, page)
-        total_found = first_page['found']
+    # for language in programming_languages:
+    #     page = 0
+    #     first_page = get_api_response(language, page)
+    #     total_found = first_page['found']
+    #
+    #     if total_found > 99:
+    #         pages_number = first_page['pages']
+    #         total_vacancies = [vacancies for vacancies in first_page['items']]
+    #         get_all_vacancies(language, page + 1, pages_number, total_vacancies)
+    #         get_average_info_hh(language, total_vacancies, total_found)
+    #     else:
+    #         continue
+    #
+    # print(language_vacancies)
 
-        if total_found > 99:
-            pages_number = first_page['pages']
-            total_vacancies = [vacancies for vacancies in first_page['items']]
-            get_all_vacancies(language, page + 1, pages_number, total_vacancies)
-            get_average_info_hh(language, total_vacancies, total_found)
-        else:
-            continue
-
-    print(language_vacancies)
+    load_dotenv()
+    sj_api_key = os.getenv('SECRET_KEY')
+    sj_response = get_sjapi_response(sj_api_key)['objects']
+    for vacancy in sj_response:
+        print(vacancy['profession'])
