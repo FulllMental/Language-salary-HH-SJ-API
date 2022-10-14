@@ -1,5 +1,6 @@
 import os
 import requests
+from terminaltables import SingleTable
 from dotenv import load_dotenv
 
 
@@ -45,14 +46,13 @@ def get_all_hh_vacancies(programming_language, page, pages_number, total_vacanci
 def get_average_info_hh(programming_language, total_vacancies, total_found):
     average_salary_list = [predict_rub_salary_for_hh(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
     vacancies_processed = len(average_salary_list)
-    language_hh_vacancies.update(
-        {
-            programming_language: {
-                'vacancies_found': total_found,
-                'vacancies_processed': vacancies_processed,
-                'average_salary': int(safe_division(sum(average_salary_list), vacancies_processed))
-            }
-        }
+    language_hh_vacancies.append(
+        [
+            programming_language,
+            total_found,
+            vacancies_processed,
+            int(safe_division(sum(average_salary_list), vacancies_processed))
+        ]
     )
     return language_hh_vacancies
 
@@ -66,14 +66,13 @@ def get_average_info_sj(programming_language, total_vacancies, total_found):
             if avg_salary:
                 average_salary_list.append(avg_salary)
     vacancies_processed = len(average_salary_list)
-    language_sj_vacancies.update(
-        {
-            programming_language: {
-                'vacancies_found': total_found,
-                'vacancies_processed': vacancies_processed,
-                'average_salary': int(safe_division(sum(average_salary_list), vacancies_processed))
-            }
-        }
+    language_sj_vacancies.append(
+        [
+            programming_language,
+            total_found,
+            vacancies_processed,
+            int(safe_division(sum(average_salary_list), vacancies_processed))
+        ]
     )
     return language_sj_vacancies
 
@@ -105,9 +104,14 @@ def safe_division(x, y):
     except ZeroDivisionError:
         return 0
 
+def format_table(data, title):
+    table_instance = SingleTable(data, title)
+    table_instance.justify_columns[4] = 'right'
+    print(table_instance.table)
+    print()
+
 
 if __name__ == '__main__':
-    start = datetime.now()
     load_dotenv()
     sj_api_key = os.getenv('SECRET_KEY')
     programming_languages = [
@@ -125,8 +129,8 @@ if __name__ == '__main__':
         'TypeScript'
     ]
 
-    language_hh_vacancies = {}
-    language_sj_vacancies = {}
+    language_hh_vacancies = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
+    language_sj_vacancies = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     for language in programming_languages:
         page = 0
         first_sj_page = get_superjob_api_response(language, sj_api_key, page)
@@ -146,7 +150,5 @@ if __name__ == '__main__':
                 page += 1
         else:
             get_average_info_sj(language, first_sj_page['objects'], total_sj_found)
-    print('HeadHunter stats:')
-    print(language_hh_vacancies)
-    print('SuperJob stats:')
-    print(language_sj_vacancies)
+    format_table(language_hh_vacancies, title=' HeadHunter Moscow ')
+    format_table(language_sj_vacancies, title=' SuperJob Moscow ')
