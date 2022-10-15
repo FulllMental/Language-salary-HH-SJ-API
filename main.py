@@ -60,7 +60,6 @@ def get_average_info_hh(programming_language, total_vacancies, total_found):
 def get_average_info_sj(programming_language, total_vacancies, total_found):
     average_salary_list = []
     for vacancy in total_vacancies:
-        avg_salary = perdict_rub_salary_for_superjob(vacancy)
         if vacancy['currency'] == 'rub':
             avg_salary = perdict_rub_salary_for_superjob(vacancy)
             if avg_salary:
@@ -103,6 +102,7 @@ def safe_division(x, y):
         return x / y
     except ZeroDivisionError:
         return 0
+
 
 def format_table(data, title):
     table_instance = SingleTable(data, title)
