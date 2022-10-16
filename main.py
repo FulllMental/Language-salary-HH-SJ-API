@@ -51,19 +51,19 @@ def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page
 
 def get_average_info_hh(programming_language, total_vacancies, total_found):
     average_salary = []
+    current_language_hh_vacancies = []
     for vacancy in total_vacancies:
         if vacancy['salary']['currency'] == 'RUR':
             average_salary.append(predict_rub_salary_for_hh(vacancy))
     vacancies_processed = len(average_salary)
-    language_hh_vacancies.append(
-        [
-            programming_language,
-            total_found,
-            vacancies_processed,
-            int(safe_division(sum(average_salary), vacancies_processed))
-        ]
-    )
-    return language_hh_vacancies
+    current_language_hh_vacancies = [
+        programming_language,
+        total_found,
+        vacancies_processed,
+        int(safe_division(sum(average_salary), vacancies_processed))
+    ]
+
+    return current_language_hh_vacancies
 
 
 def get_average_info_sj(programming_language, total_vacancies, total_found):
@@ -74,15 +74,13 @@ def get_average_info_sj(programming_language, total_vacancies, total_found):
             if avg_salary:
                 average_salary.append(avg_salary)
     vacancies_processed = len(average_salary)
-    language_sj_vacancies.append(
-        [
-            programming_language,
-            total_found,
-            vacancies_processed,
-            int(safe_division(sum(average_salary), vacancies_processed))
-        ]
-    )
-    return language_sj_vacancies
+    current_language_sj_vacancies = [
+        programming_language,
+        total_found,
+        vacancies_processed,
+        int(safe_division(sum(average_salary), vacancies_processed))
+    ]
+    return current_language_sj_vacancies
 
 
 def predict_rub_salary(salary_from, salary_to):
@@ -116,8 +114,7 @@ def safe_division(x, y):
 def format_table(data, title):
     table_instance = SingleTable(data, title)
     table_instance.justify_columns[4] = 'right'
-    print(table_instance.table)
-    print()
+    print(table_instance.table, end='\n')
 
 
 if __name__ == '__main__':
@@ -151,14 +148,17 @@ if __name__ == '__main__':
         if total_hh_found > min_hh_vacancies:
             pages_number = first_hh_page['pages']
             total_hh_vacancies = get_all_hh_vacancies(language, page + 1, pages_number, first_hh_page)
-            get_average_info_hh(language, total_hh_vacancies, total_hh_found)
+            current_language_hh_vacancies = get_average_info_hh(language, total_hh_vacancies, total_hh_found)
+            language_hh_vacancies.append(current_language_hh_vacancies)
         if total_sj_found > min_sj_vacancies:
             page_numbers = (total_sj_found - 1) // min_sj_vacancies + 1
             while page_numbers > page:
                 total_sj_vacancies = get_superjob_api_response(language, sj_api_key, page)['objects']
-                get_average_info_sj(language, total_sj_vacancies, total_sj_found)
+                current_language_sj_vacancies = get_average_info_sj(language, total_sj_vacancies, total_sj_found)
+                language_sj_vacancies.append(current_language_sj_vacancies)
                 page += 1
         else:
-            get_average_info_sj(language, first_sj_page['objects'], total_sj_found)
+            current_language_sj_vacancies = get_average_info_sj(language, first_sj_page['objects'], total_sj_found)
+            language_sj_vacancies.append(current_language_sj_vacancies)
     format_table(language_hh_vacancies, title=' HeadHunter Moscow ')
     format_table(language_sj_vacancies, title=' SuperJob Moscow ')
