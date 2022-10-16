@@ -50,7 +50,10 @@ def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page
 
 
 def get_average_info_hh(programming_language, total_vacancies, total_found):
-    average_salary = [predict_rub_salary_for_hh(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
+    average_salary = []
+    for vacancy in total_vacancies:
+        if vacancy['salary']['currency'] == 'RUR':
+            average_salary.append(predict_rub_salary_for_hh(vacancy))
     vacancies_processed = len(average_salary)
     language_hh_vacancies.append(
         [
