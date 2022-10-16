@@ -143,12 +143,14 @@ if __name__ == '__main__':
         first_hh_page = get_hh_api_response(language, page)
         total_hh_found = first_hh_page['found']
         total_sj_found = first_sj_page['total']
-        if total_hh_found > 99:
+        min_hh_vacancies = 99
+        min_sj_vacancies = 100
+        if total_hh_found > min_hh_vacancies:
             pages_number = first_hh_page['pages']
             total_hh_vacancies = get_all_hh_vacancies(language, page + 1, pages_number, first_hh_page)
             get_average_info_hh(language, total_hh_vacancies, total_hh_found)
-        if total_sj_found > 100:
-            page_numbers = (total_sj_found - 1) // 100 + 1
+        if total_sj_found > min_sj_vacancies:
+            page_numbers = (total_sj_found - 1) // min_sj_vacancies + 1
             while page_numbers > page:
                 total_sj_vacancies = get_superjob_api_response(language, sj_api_key, page)['objects']
                 get_average_info_sj(language, total_sj_vacancies, total_sj_found)
