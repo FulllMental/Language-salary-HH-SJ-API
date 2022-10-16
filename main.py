@@ -113,7 +113,7 @@ def format_table(data, title):
 
 if __name__ == '__main__':
     load_dotenv()
-    sj_api_key = os.getenv('SECRET_KEY')
+    sj_api_key = os.getenv('SJ_SECRET_KEY')
     programming_languages = [
         'JavaScript',
         'Java',
