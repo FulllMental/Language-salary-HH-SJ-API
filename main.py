@@ -51,10 +51,10 @@ def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page
 
 def get_average_info_hh(programming_language, total_vacancies, total_found):
     average_salary = []
-    current_language_hh_vacancies = []
     for vacancy in total_vacancies:
-        if vacancy['salary']['currency'] == 'RUR':
-            average_salary.append(predict_rub_salary_for_hh(vacancy))
+        if vacancy['salary']['currency'] != 'RUR':
+            continue
+        average_salary.append(predict_rub_salary_for_hh(vacancy))
     vacancies_processed = len(average_salary)
     current_language_hh_vacancies = [
         programming_language,
@@ -69,10 +69,10 @@ def get_average_info_hh(programming_language, total_vacancies, total_found):
 def get_average_info_sj(programming_language, total_vacancies, total_found):
     average_salary = []
     for vacancy in total_vacancies:
-        if vacancy['currency'] == 'rub':
-            avg_salary = perdict_rub_salary_for_superjob(vacancy)
-            if avg_salary:
-                average_salary.append(avg_salary)
+        avg_salary = perdict_rub_salary_for_superjob(vacancy)
+        if vacancy['currency'] != 'rub' or not avg_salary:
+            continue
+        average_salary.append(avg_salary)
     vacancies_processed = len(average_salary)
     current_language_sj_vacancies = [
         programming_language,
@@ -162,4 +162,4 @@ if __name__ == '__main__':
             language_sj_vacancies.append(current_language_sj_vacancies)
     hh_table = format_table(language_hh_vacancies, title=' HeadHunter Moscow ')
     sj_table = format_table(language_sj_vacancies, title=' SuperJob Moscow ')
-    print(hh_table,'\n', sj_table, sep='')
+    print(hh_table, '\n', sj_table, sep='')
