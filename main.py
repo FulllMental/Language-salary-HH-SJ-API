@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 def get_hh_api_response(language, page):
     payload = {
         'text': f'Программист {language}',
-        'area': '1',
-        'period': '30',
+        'area': 1,
+        'period': 30,
         'only_with_salary': True,
         'per_page': 100,
         'page': {page},
@@ -33,7 +33,8 @@ def get_superjob_api_response(language, sj_api_key, page):
     return response.json()
 
 
-def get_all_hh_vacancies(programming_language, page, pages_number, total_vacancies):
+def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page):
+    total_vacancies = [vacancies for vacancies in first_hh_page['items']]
     while page < pages_number:
         page_response = get_hh_api_response(programming_language, page)
         page_items = page_response['items']
@@ -139,8 +140,7 @@ if __name__ == '__main__':
         total_sj_found = first_sj_page['total']
         if total_hh_found > 99:
             pages_number = first_hh_page['pages']
-            total_hh_vacancies = [vacancies for vacancies in first_hh_page['items']]
-            get_all_hh_vacancies(language, page + 1, pages_number, total_hh_vacancies)
+            total_hh_vacancies = get_all_hh_vacancies(language, page + 1, pages_number, first_hh_page)
             get_average_info_hh(language, total_hh_vacancies, total_hh_found)
         if total_sj_found > 100:
             page_numbers = (total_sj_found - 1) // 100 + 1
