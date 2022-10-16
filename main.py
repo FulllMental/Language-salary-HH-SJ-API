@@ -5,13 +5,16 @@ from dotenv import load_dotenv
 
 
 def get_hh_api_response(language, page):
+    vacancies_per_page = 100
+    town_id = 1
+    period_days = 30
     payload = {
         'text': f'Программист {language}',
-        'area': 1,
-        'period': 30,
+        'area': town_id,
+        'period': period_days,
         'only_with_salary': True,
-        'per_page': 100,
-        'page': {page},
+        'per_page': vacancies_per_page,
+        'page': page,
     }
     response = requests.get('https://api.hh.ru/vacancies', params=payload)
     response.raise_for_status()
@@ -19,13 +22,15 @@ def get_hh_api_response(language, page):
 
 
 def get_superjob_api_response(language, sj_api_key, page):
+    vacancies_per_page = 100
+    town_id = 4
     headers = {
         'X-Api-App-Id': sj_api_key,
     }
     payload = {
         'page': page,
-        'count': 100,
-        'town': 4,
+        'count': vacancies_per_page,
+        'town': town_id,
         'keyword': f'Программист {language}',
     }
     response = requests.get('https://api.superjob.ru/2.0/vacancies', headers=headers, params=payload)
