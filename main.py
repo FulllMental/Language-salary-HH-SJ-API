@@ -50,33 +50,33 @@ def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page
 
 
 def get_average_info_hh(programming_language, total_vacancies, total_found):
-    average_salary_list = [predict_rub_salary_for_hh(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
-    vacancies_processed = len(average_salary_list)
+    average_salary = [predict_rub_salary_for_hh(vacancy) for vacancy in total_vacancies if vacancy['salary']['currency'] == 'RUR']
+    vacancies_processed = len(average_salary)
     language_hh_vacancies.append(
         [
             programming_language,
             total_found,
             vacancies_processed,
-            int(safe_division(sum(average_salary_list), vacancies_processed))
+            int(safe_division(sum(average_salary), vacancies_processed))
         ]
     )
     return language_hh_vacancies
 
 
 def get_average_info_sj(programming_language, total_vacancies, total_found):
-    average_salary_list = []
+    average_salary = []
     for vacancy in total_vacancies:
         if vacancy['currency'] == 'rub':
             avg_salary = perdict_rub_salary_for_superjob(vacancy)
             if avg_salary:
-                average_salary_list.append(avg_salary)
-    vacancies_processed = len(average_salary_list)
+                average_salary.append(avg_salary)
+    vacancies_processed = len(average_salary)
     language_sj_vacancies.append(
         [
             programming_language,
             total_found,
             vacancies_processed,
-            int(safe_division(sum(average_salary_list), vacancies_processed))
+            int(safe_division(sum(average_salary), vacancies_processed))
         ]
     )
     return language_sj_vacancies
