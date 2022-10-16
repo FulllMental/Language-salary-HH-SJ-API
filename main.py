@@ -114,7 +114,7 @@ def safe_division(x, y):
 def format_table(data, title):
     table_instance = SingleTable(data, title)
     table_instance.justify_columns[4] = 'right'
-    print(table_instance.table, end='\n')
+    return table_instance.table
 
 
 if __name__ == '__main__':
@@ -160,5 +160,6 @@ if __name__ == '__main__':
         else:
             current_language_sj_vacancies = get_average_info_sj(language, first_sj_page['objects'], total_sj_found)
             language_sj_vacancies.append(current_language_sj_vacancies)
-    format_table(language_hh_vacancies, title=' HeadHunter Moscow ')
-    format_table(language_sj_vacancies, title=' SuperJob Moscow ')
+    hh_table = format_table(language_hh_vacancies, title=' HeadHunter Moscow ')
+    sj_table = format_table(language_sj_vacancies, title=' SuperJob Moscow ')
+    print(hh_table,'\n', sj_table, sep='')
