@@ -49,7 +49,7 @@ def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page
     return total_vacancies
 
 
-def get_average_info_hh(programming_language, total_vacancies, total_found):
+def get_average_hh_statistics(programming_language, total_vacancies, total_found):
     average_salary = []
     for vacancy in total_vacancies:
         if vacancy['salary']['currency'] != 'RUR':
@@ -66,7 +66,7 @@ def get_average_info_hh(programming_language, total_vacancies, total_found):
     return language_hh_vacancy_statistics
 
 
-def get_average_info_sj(programming_language, total_vacancies, total_found):
+def get_average_sj_statistics(programming_language, total_vacancies, total_found):
     average_salary = []
     for vacancy in total_vacancies:
         avg_salary = perdict_rub_salary_for_superjob(vacancy)
@@ -120,21 +120,21 @@ def format_table(data, title):
 def get_hh_language_statistics(language, first_hh_page, page, total_hh_vacancies_found):
     pages_number = first_hh_page['pages']
     total_hh_vacancies = get_all_hh_vacancies(language, page + 1, pages_number, first_hh_page)
-    language_hh_vacancy_statistics = get_average_info_hh(language, total_hh_vacancies, total_hh_vacancies_found)
+    language_hh_vacancy_statistics = get_average_hh_statistics(language, total_hh_vacancies, total_hh_vacancies_found)
     return language_hh_vacancy_statistics
 
 
 def get_sj_language_statistics(language, sj_api_key, page, min_vacancies):
     first_sj_page = get_superjob_api_response(language, sj_api_key, page)
     total_sj_found = first_sj_page['total']
-    language_sj_vacancy_statistics = get_average_info_sj(language, first_sj_page['objects'], total_sj_found)
+    language_sj_vacancy_statistics = get_average_sj_statistics(language, first_sj_page['objects'], total_sj_found)
 
     if total_sj_found > min_vacancies:
         page_numbers = (total_sj_found - 1) // min_vacancies
         while page_numbers > page:
             page += 1
             total_sj_vacancies = get_superjob_api_response(language, sj_api_key, page)['objects']
-            average_info_sj = get_average_info_sj(language, total_sj_vacancies, total_sj_found)
+            average_info_sj = get_average_sj_statistics(language, total_sj_vacancies, total_sj_found)
             language_sj_vacancy_statistics.append(average_info_sj)
     return language_sj_vacancy_statistics
 
