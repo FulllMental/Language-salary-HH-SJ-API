@@ -2,6 +2,7 @@ import os
 import requests
 from terminaltables import SingleTable
 from dotenv import load_dotenv
+import argparse
 
 
 def get_hh_api_response(language, page):
@@ -141,6 +142,11 @@ def get_sj_language_statistics(language, sj_api_key, page, min_vacancies):
 
 if __name__ == '__main__':
     load_dotenv()
+    parser = argparse.ArgumentParser(description='Программа собирает данные с сайтов HeadHunter и SuperJob'
+                                                 'по вакансиям программиста на различных языках.'
+                                                 'Скрипт не требует никаких дополнительных данных,'
+                                                 'как закончится обработка, на экран выведутся таблицы со статистикой')
+    parser.parse_args()
     sj_api_key = os.getenv('SJ_SECRET_KEY')
     min_vacancies = 100
     page = 0
@@ -171,7 +177,6 @@ if __name__ == '__main__':
             continue
         hh_language_statistics = get_hh_language_statistics(language, first_hh_page, page, total_hh_vacancies_found)
         hh_vacancies_statistics.append(hh_language_statistics)
-
     hh_table = format_table(hh_vacancies_statistics, title=' HeadHunter Moscow ')
     sj_table = format_table(sj_vacancies_statistics, title=' SuperJob Moscow ')
     print(hh_table, '\n', sj_table, sep='')
