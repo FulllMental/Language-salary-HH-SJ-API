@@ -1,8 +1,10 @@
 import os
 import requests
+import logging
+import argparse
 from terminaltables import SingleTable
 from dotenv import load_dotenv
-import argparse
+from datetime import datetime
 
 
 def get_hh_api_response(language, page):
@@ -53,7 +55,7 @@ def get_all_hh_vacancies(programming_language, page, pages_number, first_hh_page
 def get_average_hh_statistics(programming_language, total_vacancies, total_found):
     average_salary = []
     for vacancy in total_vacancies:
-        if vacancy['salary']['currency'] != 'RUR':
+        if vacancy['salary'] and vacancy['salary']['currency'] != 'RUR':
             continue
         average_salary.append(predict_rub_salary_for_hh(vacancy))
     vacancies_processed = len(average_salary)
@@ -129,7 +131,6 @@ def get_sj_language_statistics(language, sj_api_key, page, min_vacancies):
     first_sj_page = get_superjob_api_response(language, sj_api_key, page)
     total_sj_found = first_sj_page['total']
     language_sj_vacancy_statistics = get_average_sj_statistics(language, first_sj_page['objects'], total_sj_found)
-
     if total_sj_found > min_vacancies:
         page_numbers = (total_sj_found - 1) // min_vacancies
         while page_numbers > page:
@@ -141,11 +142,13 @@ def get_sj_language_statistics(language, sj_api_key, page, min_vacancies):
 
 
 if __name__ == '__main__':
+    start = datetime.now()
+    logging.basicConfig(level=logging.INFO)
     load_dotenv()
-    parser = argparse.ArgumentParser(description='Программа собирает данные с сайтов HeadHunter и SuperJob'
+    parser = argparse.ArgumentParser(description='Программа собирает данные с сайтов HeadHunter и SuperJob '
                                                  'по вакансиям программиста на различных языках.'
-                                                 'Скрипт не требует никаких дополнительных данных,'
-                                                 'как закончится обработка, на экран выведутся таблицы со статистикой')
+                                                 'Скрипт не требует никаких дополнительных данных, '
+                                                 'как закончится обработка, на экран выведутся таблицы со статистикой.')
     parser.parse_args()
     sj_api_key = os.getenv('SJ_SECRET_KEY')
     min_vacancies = 100
@@ -164,8 +167,10 @@ if __name__ == '__main__':
         'Swift',
         'TypeScript'
     ]
+
     hh_vacancies_statistics = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     sj_vacancies_statistics = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
+    logging.info(f' {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}: Начинаю сбор данных по вакансиям SuperJob и HeadHunter...')
 
     for language in programming_languages:
         sj_language_statistics = get_sj_language_statistics(language, sj_api_key, page, min_vacancies)
@@ -177,6 +182,9 @@ if __name__ == '__main__':
             continue
         hh_language_statistics = get_hh_language_statistics(language, first_hh_page, page, total_hh_vacancies_found)
         hh_vacancies_statistics.append(hh_language_statistics)
+    logging.info(f' {datetime.now().strftime("%m/%d/%Y %H:%M:%S")}: Сбор данных завершён, формирую таблицы со статистикой...\n')
     hh_table = format_table(hh_vacancies_statistics, title=' HeadHunter Moscow ')
     sj_table = format_table(sj_vacancies_statistics, title=' SuperJob Moscow ')
     print(hh_table, '\n', sj_table, sep='')
+    end = datetime.now()
+    print(f'Время работы программы: {(end - start).seconds} секунд')
